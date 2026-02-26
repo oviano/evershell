@@ -4,7 +4,7 @@ Persistent remote terminal sessions with native scrollback. A single standalone 
 
 An agent runs on your server and hosts shell sessions that survive disconnects. When you reconnect, your session is exactly where you left it — the agent tracks output and sends only what changed. No full-screen flash, no visual reset.
 
-The agent is free and open source (MIT). The [iOS app](https://apps.apple.com) connects to it.
+The agent is free and open source (MIT). The [iOS app](https://apps.apple.com) connects to it. Android, macOS, Ubuntu, and Windows clients coming soon.
 
 ## Install
 
@@ -91,6 +91,14 @@ cp /path/to/new/evershell-agent ~/evershell/
 systemctl --user start evershell-agent
 ```
 
+## Uninstall
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/uninstall.sh | bash
+```
+
+Stops the service and removes the binary, settings, token, and TLS certificates.
+
 ## Configuration
 
 Settings are in `settings.json`:
@@ -125,7 +133,7 @@ Restart the service after changing settings.
 
 **Port already in use** — Another process is using port 8025. Change `bind_port` in settings.json, or find and stop the conflicting process.
 
-**Can't connect from app** — Check that the port is open in your firewall. The agent listens on `0.0.0.0` by default (all interfaces). If behind NAT, you'll need to forward port 8025 (TCP and UDP).
+**Can't connect from app** — Check that port 8025 is open for both **TCP and UDP** in your firewall. TCP is used for the control connection and UDP for the terminal stream. The agent listens on `0.0.0.0` by default (all interfaces). If behind NAT, you'll need to forward both protocols.
 
 **Token not found** — The token is auto-generated on first run. Check the settings directory paths above. If the file doesn't exist, the agent hasn't started successfully — check the logs.
 
@@ -137,6 +145,12 @@ cat ~/evershell/logs/stderr.log
 # Linux
 journalctl --user -u evershell-agent --no-pager -n 20
 ```
+
+## Requirements
+
+**macOS** — No dependencies.
+
+**Linux** — Requires `libdbus-1`. Present on all standard Ubuntu installs. On minimal/container setups: `sudo apt install libdbus-1-3`
 
 ## Platforms
 
