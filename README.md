@@ -4,7 +4,7 @@ Persistent remote terminal sessions with native scrollback. A single standalone 
 
 An agent runs on your server and hosts shell sessions that survive disconnects. When you reconnect, your session is exactly where you left it — the agent tracks output and sends only what changed. No full-screen flash, no visual reset.
 
-The agent is free and open source (MIT). The [iOS and macOS app](https://apps.apple.com) connects to it.
+The agent is free and open source (MIT). The [iOS app](https://apps.apple.com) connects to it.
 
 ## Install
 
@@ -83,7 +83,6 @@ Or manually:
 # macOS
 launchctl stop com.evershell.agent
 cp /path/to/new/evershell-agent ~/evershell/
-codesign --force --sign - ~/evershell/evershell-agent
 launchctl start com.evershell.agent
 
 # Linux
