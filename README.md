@@ -16,28 +16,34 @@ The client uses speculative local echo (similar to Mosh) — printable keystroke
 
 Sessions continue running while disconnected. Reconnecting picks up right where you left off, even if the session produced output in the meantime.
 
+## Why not tmux + mosh?
+
+tmux and mosh are excellent tools, but combining them has trade-offs. tmux manages sessions and mosh handles latency, but scrollback requires workarounds — tmux's scrollback is its own buffer that doesn't integrate with your terminal's native scroll, so you lose natural gestures like trackpad flicking or pixel-smooth scrolling on mobile.
+
+evershell is a single binary built for this specific use case. The agent maintains scrollback on the server and streams it to the client as native content, so you get real scrollback with the scrolling behaviour your device expects. No configuration, no pairing two tools together, no scrollback hacks.
+
+The project was inspired by the need for easy long-running Claude Code sessions that just work — connect from your phone, check on progress, disconnect, reconnect later from your laptop, and everything is still there, in a modern, sleek UI.
+
 ## Install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | bash
 ```
 
-This downloads the latest release, installs the binary to `~/evershell/`, sets up a system service, and prints your authentication token.
+This will:
 
-### Specific version
+1. Download the latest release to `~/evershell/evershell-agent`
+2. Create and start a system service (launchd on macOS, systemd on Linux)
+3. Auto-generate TLS certificates and an authentication token
+4. Start listening on `0.0.0.0:8025`
+
+The token is printed at the end of the install. You'll need it to connect from the app.
+
+To install a specific version:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | bash -s -- --version 0.9.0
 ```
-
-## What happens
-
-1. The binary is installed to `~/evershell/evershell-agent`
-2. A system service is created and started (launchd on macOS, systemd on Linux)
-3. TLS certificates and an authentication token are auto-generated
-4. The agent listens on `0.0.0.0:8025`
-
-The token is printed at the end of the install. You'll need it to connect from the app.
 
 ## Connecting from the app
 
