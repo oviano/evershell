@@ -2,9 +2,19 @@
 
 Persistent remote terminal sessions with native scrollback. A single standalone binary, no dependencies.
 
-An agent runs on your server and hosts shell sessions that survive disconnects. When you reconnect, your session is exactly where you left it — the agent tracks output and sends only what changed. No full-screen flash, no visual reset.
+An agent runs on your server and hosts shell sessions in pseudo-terminals. Sessions survive disconnects — when you reconnect, the agent sends the full current screen state and you're back where you left off.
 
-The agent is free and open source (MIT). The [iOS app](https://apps.apple.com) connects to it. Android, macOS, Ubuntu, and Windows clients coming soon.
+The agent is free and open source (MIT). An iOS client app is in private beta testing, with Android, macOS, Ubuntu and Windows clients planned.
+
+## How it works
+
+The agent runs a terminal emulator (libvtermcpp) on the server side, maintaining a complete model of each session's screen state including scrollback history.
+
+When a client connects, it receives the full current state and scrollback — rendered natively with pixel-smooth scrolling. While attached, the agent computes cell-level diffs of the terminal screen, compresses them with zstd, and streams them over UDP (DTLS-encrypted). A separate TCP connection (TLS-encrypted) handles session management, keyboard input, and resize events.
+
+The client uses speculative local echo (similar to Mosh) — printable keystrokes are rendered immediately before the server confirms them, hiding network latency.
+
+Sessions continue running while disconnected. Reconnecting picks up right where you left off, even if the session produced output in the meantime.
 
 ## Install
 
@@ -17,7 +27,7 @@ This downloads the latest release, installs the binary to `~/evershell/`, sets u
 ### Specific version
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | bash -s -- --version 1.0.0
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | bash -s -- --version 0.9.0
 ```
 
 ## What happens
@@ -162,4 +172,4 @@ journalctl --user -u evershell-agent --no-pager -n 20
 
 ## License
 
-MIT
+Released under the [MIT License](LICENSE).
