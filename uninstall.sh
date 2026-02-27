@@ -3,7 +3,7 @@
 # Uninstall evershell-agent.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/uninstall.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/oviano/evershell-agent/main/uninstall.sh | bash
 #
 
 set -euo pipefail

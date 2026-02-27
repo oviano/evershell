@@ -27,7 +27,7 @@ The project was inspired by the need for easy long-running Claude Code sessions 
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell-agent/main/install.sh | bash
 ```
 
 This will:
@@ -42,7 +42,7 @@ The token is printed at the end of the install. You'll need it to connect from t
 To install a specific version:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | bash -s -- --version 0.9.0
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell-agent/main/install.sh | bash -s -- --version 0.9.0
 ```
 
 ## Connecting from the app
@@ -90,7 +90,7 @@ journalctl --user -u evershell-agent -f
 Re-run the install script — it stops the running service, replaces the binary, and restarts.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell-agent/main/install.sh | bash
 ```
 
 Or manually:
@@ -110,7 +110,7 @@ systemctl --user start evershell-agent
 ## Uninstall
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell-agent/main/uninstall.sh | bash
 ```
 
 Stops the service and removes the binary, settings, token, and TLS certificates.

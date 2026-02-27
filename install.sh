@@ -3,13 +3,13 @@
 # Install evershell-agent from GitHub Releases.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/oviano/evershell/master/install.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/oviano/evershell/master/install.sh | bash -s -- --version 1.2.0
+#   curl -fsSL https://raw.githubusercontent.com/oviano/evershell-agent/master/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/oviano/evershell-agent/master/install.sh | bash -s -- --version 1.2.0
 #
 
 set -euo pipefail
 
-REPO="oviano/evershell"
+REPO="oviano/evershell-agent"
 VERSION=""
 
 # Parse arguments
