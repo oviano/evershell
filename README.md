@@ -6,24 +6,6 @@ An agent runs on your server and hosts shell sessions in pseudo-terminals. Sessi
 
 The agent is free and open source (MIT). An iOS client app is in private beta testing, with Android, macOS, Ubuntu and Windows clients planned.
 
-## How it works
-
-The agent runs a terminal emulator (libvtermcpp) on the server side, maintaining a complete model of each session's screen state including scrollback history.
-
-When a client connects, it receives the full current state and scrollback — rendered natively with pixel-smooth scrolling. While attached, the agent computes cell-level diffs of the terminal screen, compresses them with zstd, and streams them over UDP (DTLS-encrypted). A separate TCP connection (TLS-encrypted) handles session management, keyboard input, and resize events.
-
-The client uses speculative local echo (similar to Mosh) — printable keystrokes are rendered immediately before the server confirms them, hiding network latency.
-
-Sessions continue running while disconnected. Reconnecting picks up right where you left off, even if the session produced output in the meantime.
-
-## Why not tmux + mosh?
-
-tmux and mosh are excellent tools, but combining them has trade-offs. tmux manages sessions and mosh handles latency, but scrollback requires workarounds — tmux's scrollback is its own buffer that doesn't integrate with your terminal's native scroll, so you lose natural gestures like trackpad flicking or pixel-smooth scrolling on mobile.
-
-evershell is a single binary built for this specific use case. The agent maintains scrollback on the server and streams it to the client as native content, so you get real scrollback with the scrolling behaviour your device expects. No configuration, no pairing two tools together, no scrollback hacks.
-
-The project was inspired by the need for easy long-running Claude Code sessions that just work — connect from your phone, check on progress, disconnect, reconnect later from your laptop, and everything is still there, in a modern, sleek UI.
-
 ## Install
 
 ```bash
@@ -44,6 +26,24 @@ To install a specific version:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/oviano/evershell-agent/main/install.sh | bash -s -- --version 0.9.0
 ```
+
+## How it works
+
+The agent runs a terminal emulator (libvtermcpp) on the server side, maintaining a complete model of each session's screen state including scrollback history.
+
+When a client connects, it receives the full current state and scrollback — rendered natively with pixel-smooth scrolling. While attached, the agent computes cell-level diffs of the terminal screen, compresses them with zstd, and streams them over UDP (DTLS-encrypted). A separate TCP connection (TLS-encrypted) handles session management, keyboard input, and resize events.
+
+The client uses speculative local echo (similar to Mosh) — printable keystrokes are rendered immediately before the server confirms them, hiding network latency.
+
+Sessions continue running while disconnected. Reconnecting picks up right where you left off, even if the session produced output in the meantime.
+
+## Why not tmux + mosh?
+
+tmux and mosh are excellent tools, but combining them has trade-offs. tmux manages sessions and mosh handles latency, but scrollback requires workarounds — tmux's scrollback is its own buffer that doesn't integrate with your terminal's native scroll, so you lose natural gestures like trackpad flicking or pixel-smooth scrolling on mobile.
+
+evershell is a single binary built for this specific use case. The agent maintains scrollback on the server and streams it to the client as native content, so you get real scrollback with the scrolling behaviour your device expects. No configuration, no pairing two tools together, no scrollback hacks.
+
+The project was inspired by the need for easy long-running Claude Code sessions that just work — connect from your phone, check on progress, disconnect, reconnect later from your laptop, and everything is still there, in a modern, sleek UI.
 
 ## Connecting from the app
 
