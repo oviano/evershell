@@ -4,7 +4,7 @@ Persistent remote terminal sessions with native scrollback and smart notificatio
 
 The agent runs on your server and manages shell sessions in pseudo-terminals. Sessions survive both client disconnects and agent restarts — when you reconnect, you get the full current screen state and you're back where you left off. While disconnected, AI watches your sessions and sends push notifications when something needs your attention.
 
-The server is free and open source (MIT). An iOS client app is in private beta testing, with Android, macOS, Ubuntu and Windows clients planned.
+The server is free and open source (MIT). iOS and macOS client apps are in beta testing, with Android, Ubuntu and Windows clients planned.
 
 ## Install
 
