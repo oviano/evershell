@@ -31,7 +31,7 @@ curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | 
 
 For each session, the agent runs a server-side terminal emulator (libvtermcpp), maintaining a complete model of the screen state including scrollback history.
 
-When a client connects, it receives the full current state and scrollback — rendered natively with pixel-smooth scrolling. While attached, the agent computes cell-level diffs, compresses them with zstd, and streams them over UDP (DTLS-encrypted). A separate TCP connection (TLS-encrypted) handles session management, keyboard input, and resize events.
+When a client connects, it receives the full current state and scrollback — rendered natively with pixel-smooth scrolling. While attached, the agent computes cell-level diffs, compresses them with zstd, and streams them over UDP (DTLS-encrypted). Keyboard input flows back over the same UDP channel for minimal latency. A separate TCP connection (TLS-encrypted) handles session management and resize events.
 
 The client uses speculative local echo (similar to Mosh) — printable keystrokes are rendered immediately before the server confirms them, hiding network latency.
 
