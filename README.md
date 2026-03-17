@@ -55,7 +55,7 @@ When you disconnect or background the app, the agent monitors your sessions and 
 - **App-defined** — programs can send custom notifications with title and body via OSC escape sequences
 - **AI summary** — when a session goes idle after producing new output, AI evaluates whether you should be notified. Completions ("Build succeeded"), failures ("Tests failed with 3 errors"), and prompts waiting for input all trigger a concise, natural-language notification. Routine output and idle sessions are silently ignored.
 
-Push notifications are delivered through a relay server at `relay.evershell.app` and require no configuration beyond the defaults. The relay handles Apple Push Notification Service (APNs) delivery and, if no local AI provider is configured, AI summarization as well.
+Push notifications are delivered through a relay server at `relay.evershell.app` and require no configuration beyond the defaults. The relay handles Apple Push Notification Service (APNs) delivery.
 
 ## App features
 
