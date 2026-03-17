@@ -1,4 +1,4 @@
-# evershell
+# Evershell
 
 Persistent remote terminal sessions with native scrollback and smart notifications. A single-binary installation, no dependencies.
 
@@ -45,7 +45,7 @@ The agent uses AI to understand what's happening in your sessions and notify you
 
 Each session gets a rolling AI-generated label describing what it's doing — "Building project for macOS", "Editing nginx config", "Running test suite". Topics appear in the app's session list and update as your work evolves.
 
-On macOS with Apple Intelligence (macOS 26+), topics are generated on-device with no configuration needed. On Linux, or for cloud-based processing, configure an AI provider in settings (Anthropic, OpenAI, or Gemini) or let the relay handle it.
+On macOS with Apple Intelligence (macOS 26+), topics are generated on-device with no configuration needed. On Linux, or for cloud-based processing, configure an AI provider in settings (Anthropic, OpenAI, or Gemini).
 
 ### Push notifications
 
@@ -53,7 +53,7 @@ When you disconnect or background the app, the agent monitors your sessions and 
 
 - **Bell** — immediate notification when a terminal bell fires (e.g. a build script calling `\a` on completion)
 - **App-defined** — programs can send custom notifications with title and body via OSC escape sequences
-- **AI summary** — when a session goes idle after producing new output, AI evaluates whether you should be notified. Completions ("Build succeeded"), failures ("Tests failed with 3 errors"), and prompts waiting for input all trigger a concise, natural-language notification. Routine output and idle sessions are silently ignored.
+- **Smart** — when a session goes idle after producing new output, AI evaluates whether you should be notified. Completions ("Build succeeded"), failures ("Tests failed with 3 errors"), and prompts waiting for input all trigger a concise, natural-language notification. Routine output and idle sessions are silently ignored.
 
 Push notifications are delivered through a relay server at `relay.evershell.app` and require no configuration beyond the defaults. The relay handles Apple Push Notification Service (APNs) delivery.
 
@@ -72,13 +72,13 @@ Push notifications are delivered through a relay server at `relay.evershell.app`
 
 tmux and mosh are excellent tools, but combining them has trade-offs. tmux manages sessions and mosh handles latency, but scrollback requires workarounds — tmux's scrollback is its own buffer that doesn't integrate with your terminal's native scroll, so you lose natural gestures like trackpad flicking or pixel-smooth scrolling on mobile.
 
-evershell is built for this specific use case. The server maintains scrollback and streams it to the client as native content, so you get real scrollback with the scrolling behaviour your device expects. No configuration, no pairing two tools together, no scrollback hacks.
+Evershell is built for this specific use case. The server maintains scrollback and streams it to the client as native content, so you get real scrollback with the scrolling behaviour your device expects. No configuration, no pairing two tools together, no scrollback hacks.
 
 The project was inspired by the need for easy long-running Claude Code sessions that just work — connect from your phone, check on progress, disconnect, reconnect later from your laptop, and everything is still there, in a modern, sleek UI.
 
 ## Connecting from the app
 
-1. Open the evershell app
+1. Open the Evershell app
 2. Add a new agent — enter your server's IP/hostname, port `8025`
 3. Paste the authentication token
 4. TLS is on by default — leave it enabled
@@ -173,7 +173,7 @@ Restart the service after changing settings.
 
 ### AI provider configuration
 
-By default, the relay handles AI processing for both session topics and notifications. To run AI locally instead, add a provider configuration under `push_notifications`:
+To configure a local AI provider for session topics and notifications, add a provider configuration under `push_notifications`:
 
 ```json
 {
@@ -218,7 +218,7 @@ cat ~/evershell/logs/stderr.log
 journalctl --user -u evershell-agent --no-pager -n 20
 ```
 
-**No push notifications** — Ensure notifications are enabled in the iOS/macOS system settings for the evershell app. The agent needs outbound HTTPS access to `relay.evershell.app` on port 443.
+**No push notifications** — Ensure notifications are enabled in the iOS/macOS system settings for the Evershell app. The agent needs outbound HTTPS access to `relay.evershell.app` on port 443.
 
 ## Requirements
 
