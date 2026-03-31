@@ -4,18 +4,32 @@ Persistent remote terminal sessions with native scrollback and smart notificatio
 
 The agent runs on your server and manages shell sessions in pseudo-terminals. Sessions survive both client disconnects and agent restarts — when you reconnect, you get the full current screen state and you're back where you left off. While disconnected, AI watches your sessions and sends push notifications when something needs your attention.
 
-The server is free and open source (MIT). iOS and macOS client apps are in beta testing, with Android, Ubuntu and Windows clients planned.
+The server is free and open source (MIT). iOS and macOS client apps are in beta testing, with Android clients planned.
 
 ## Install
+
+### macOS / Linux
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | bash
 ```
 
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/oviano/evershell/main/install-windows.ps1 | iex
+```
+
+### Windows (CMD)
+
+```cmd
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install-windows.cmd -o install-windows.cmd && install-windows.cmd && del install-windows.cmd
+```
+
 This will:
 
-1. Download the latest release to `~/evershell/`
-2. Install the agent and create a system service (launchd on macOS, systemd on Linux)
+1. Download the latest release to `~/evershell/` (macOS/Linux) or `%LOCALAPPDATA%\evershell\` (Windows)
+2. Install the agent and create a system service (launchd on macOS, systemd on Linux, Windows service on Windows)
 3. Auto-generate TLS certificates and an authentication token
 4. Start listening on `0.0.0.0:8025`
 
@@ -45,7 +59,7 @@ The agent uses AI to understand what's happening in your sessions and notify you
 
 Each session gets a rolling AI-generated label describing what it's doing — "Building project for macOS", "Editing nginx config", "Running test suite". Topics appear in the app's session list and update as your work evolves.
 
-On macOS with Apple Intelligence (macOS 26+), topics are generated on-device with no configuration needed. On Linux, or for cloud-based processing, configure an AI provider in settings (Anthropic, OpenAI, or Gemini).
+On macOS with Apple Intelligence (macOS 26+), topics are generated on-device with no configuration needed. On Linux and Windows, or for cloud-based processing, configure an AI provider in settings (Anthropic, OpenAI, or Gemini).
 
 ### Push notifications
 
@@ -87,10 +101,13 @@ To retrieve your token later:
 
 ```bash
 # macOS
-cat ~/Library/Application\ Support/evershell/evershell-agent/token
+cat ~/Library/Application\ Support/evershell/evershell-agent/tokens.json
 
 # Linux
-cat ~/.config/evershell/evershell-agent/token
+cat ~/.config/evershell/evershell-agent/tokens.json
+
+# Windows (PowerShell)
+Get-Content $env:APPDATA\evershell\evershell-agent\tokens.json
 ```
 
 ## Service management
@@ -115,35 +132,39 @@ systemctl --user start evershell-agent
 journalctl --user -u evershell-agent -f
 ```
 
+### Windows
+
+```cmd
+%LOCALAPPDATA%\evershell\evershell-agent.exe stop
+%LOCALAPPDATA%\evershell\evershell-agent.exe start
+
+# Logs (PowerShell)
+Get-Content $env:APPDATA\evershell\evershell-agent\evershell-agent.log -Tail 20
+```
+
 ## Updating
 
 Re-run the install script — it stops the service, replaces the binary, and restarts.
 
 ```bash
+# macOS / Linux
 curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | bash
-```
 
-Or manually:
-
-```bash
-# macOS
-launchctl stop com.evershell.agent
-cp /path/to/new/evershell-agent ~/evershell/
-launchctl start com.evershell.agent
-
-# Linux
-systemctl --user stop evershell-agent
-cp /path/to/new/evershell-agent ~/evershell/
-systemctl --user start evershell-agent
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/oviano/evershell/main/install-windows.ps1 | iex
 ```
 
 ## Uninstall
 
 ```bash
+# macOS / Linux
 curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/uninstall.sh | bash
-```
 
-Stops the service and removes the binary, settings, token, and TLS certificates.
+# Windows (PowerShell — run as Administrator)
+%LOCALAPPDATA%\evershell\evershell-agent.exe stop
+%LOCALAPPDATA%\evershell\evershell-agent.exe uninstall
+Remove-Item -Recurse $env:LOCALAPPDATA\evershell
+```
 
 ## Configuration
 
@@ -153,6 +174,7 @@ Settings are in `settings.json`:
 |----------|------|
 | macOS | `~/Library/Application Support/evershell/evershell-agent/settings.json` |
 | Linux | `~/.config/evershell/evershell-agent/settings.json` |
+| Windows | `%APPDATA%\evershell\evershell-agent\settings.json` |
 
 On first run, default settings are copied to this location.
 
@@ -166,14 +188,14 @@ On first run, default settings are copied to this location.
 | `log_to_file` | `true` | Write to log file |
 | `log_to_stdout` | `false` | Write to stdout |
 | `push_notifications.enabled` | `true` | Enable push notifications |
-| `push_notifications.relay_url` | `https://relay.evershell.app` | Relay server for push delivery |
+| `push_notifications.relay_url` | `https://relay.evershell.app:8443` | Relay server for push delivery |
 | `push_notifications.quiescence_timeout` | `30` | Seconds of idle before AI evaluates a session |
 
 Restart the service after changing settings.
 
 ### AI provider configuration
 
-To configure a local AI provider for session topics and notifications, add a provider configuration under `push_notifications`:
+To configure an AI provider for session topics and notifications, add a provider configuration under `push_notifications`:
 
 ```json
 {
@@ -216,9 +238,12 @@ cat ~/evershell/logs/stderr.log
 
 # Linux
 journalctl --user -u evershell-agent --no-pager -n 20
+
+# Windows (PowerShell)
+Get-Content $env:APPDATA\evershell\evershell-agent\evershell-agent.log -Tail 20
 ```
 
-**No push notifications** — Ensure notifications are enabled in the iOS/macOS system settings for the Evershell app. The agent needs outbound HTTPS access to `relay.evershell.app` on port 443.
+**No push notifications** — Ensure notifications are enabled in the iOS/macOS system settings for the Evershell app. The agent needs outbound HTTPS access to `relay.evershell.app` on port 8443.
 
 ## Requirements
 
@@ -226,13 +251,15 @@ journalctl --user -u evershell-agent --no-pager -n 20
 
 **Linux** — Requires `libdbus-1`. Present on all standard Ubuntu installs. On minimal/container setups: `sudo apt install libdbus-1-3`
 
+**Windows** — No dependencies. Windows 10 version 1809 or later required (ConPTY support).
+
 ## Platforms
 
 | Platform | Status |
 |----------|--------|
 | macOS (Apple Silicon / Intel) | Supported |
 | Linux x86_64 | Supported |
-| Windows | Coming soon |
+| Windows x86_64 | Supported |
 
 ## License
 
