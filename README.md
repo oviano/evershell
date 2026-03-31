@@ -23,7 +23,7 @@ irm https://raw.githubusercontent.com/oviano/evershell/main/install-windows.ps1 
 ### Windows (CMD)
 
 ```cmd
-curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install-windows.cmd -o %TEMP%\install-windows.cmd && %TEMP%\install-windows.cmd && del %TEMP%\install-windows.cmd
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install-windows.cmd -o install-windows.cmd && install-windows.cmd && del install-windows.cmd
 ```
 
 This will:
