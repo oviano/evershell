@@ -160,10 +160,11 @@ irm https://raw.githubusercontent.com/oviano/evershell/main/install-windows.ps1 
 # macOS / Linux
 curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/uninstall.sh | bash
 
-# Windows (PowerShell — run as Administrator)
-%LOCALAPPDATA%\evershell\evershell-agent.exe stop
-%LOCALAPPDATA%\evershell\evershell-agent.exe uninstall
-Remove-Item -Recurse $env:LOCALAPPDATA\evershell
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/oviano/evershell/main/uninstall.ps1 | iex
+
+# Windows (CMD)
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/uninstall.cmd -o uninstall.cmd && uninstall.cmd && del uninstall.cmd
 ```
 
 ## Configuration
