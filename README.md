@@ -108,6 +108,9 @@ cat ~/.config/evershell/evershell-agent/tokens.json
 
 # Windows (PowerShell)
 Get-Content $env:APPDATA\evershell\evershell-agent\tokens.json
+
+# Windows (CMD)
+type %APPDATA%\evershell\evershell-agent\tokens.json
 ```
 
 ## Service management
