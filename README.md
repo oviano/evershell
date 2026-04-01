@@ -17,13 +17,13 @@ curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.sh | 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/oviano/evershell/main/install-windows.ps1 | iex
+irm https://raw.githubusercontent.com/oviano/evershell/main/install.ps1 | iex
 ```
 
 ### Windows (CMD)
 
 ```cmd
-curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install-windows.cmd -o install-windows.cmd && install-windows.cmd && del install-windows.cmd
+curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.cmd -o install.cmd && install.cmd && del install.cmd
 ```
 
 This will:
