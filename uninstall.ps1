@@ -4,36 +4,31 @@
 # Usage:
 #   irm https://raw.githubusercontent.com/oviano/evershell/main/uninstall.ps1 | iex
 #
-# Must be run as Administrator.
-#
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-# --- Check Administrator ---
-
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-    [Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $isAdmin) {
-    Write-Host "ERROR: This script must be run as Administrator."
-    Write-Host "Right-click PowerShell and select 'Run as administrator', then re-run this script."
-    exit 1
-}
-
 $InstallDir = "$env:LOCALAPPDATA\evershell"
 $SettingsDir = "$env:APPDATA\evershell"
 $Binary = "$InstallDir\evershell-agent.exe"
+$RegKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+$RegValue = "Evershell Agent"
 
-# --- Stop and uninstall service ---
+# --- Stop process ---
 
-if (Test-Path $Binary) {
-    Write-Host "Stopping service..."
-    & $Binary stop 2>$null
+$existing = Get-Process -Name "evershell-agent" -ErrorAction SilentlyContinue
+if ($existing) {
+    Write-Host "Stopping process..."
+    Stop-Process -Name "evershell-agent" -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 2
+}
 
-    Write-Host "Uninstalling service..."
-    & $Binary uninstall 2>$null
-    Start-Sleep -Seconds 1
+# --- Remove auto-start registration ---
+
+$regEntry = Get-ItemProperty -Path $RegKey -Name $RegValue -ErrorAction SilentlyContinue
+if ($regEntry) {
+    Write-Host "Removing auto-start registration..."
+    Remove-ItemProperty -Path $RegKey -Name $RegValue -Force
 }
 
 # --- Remove install directory ---

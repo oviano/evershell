@@ -7,15 +7,6 @@ REM Usage:
 REM   curl -fsSL https://raw.githubusercontent.com/oviano/evershell/main/install.cmd -o install.cmd && install.cmd && del install.cmd
 REM   install.cmd --version 0.9.0
 
-REM --- Check Administrator ---
-
-net session >nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: This script must be run as Administrator.
-    echo Right-click Command Prompt and select 'Run as administrator', then re-run this script.
-    exit /b 1
-)
-
 REM --- Parse arguments ---
 
 set "VERSION="

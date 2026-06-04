@@ -1,28 +1,19 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Install evershell-agent on Windows as a Windows service.
+REM Install evershell-agent on Windows as a background process (auto-start at logon).
 REM
 REM Usage:
 REM   install-windows.cmd [BINARY_PATH]
 REM
 REM BINARY_PATH defaults to the latest build output.
-REM Must be run as Administrator (service registration requires it).
-
-REM --- Check Administrator ---
-
-net session >nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: This script must be run as Administrator.
-    echo Right-click Command Prompt and select 'Run as administrator', then re-run this script.
-    exit /b 1
-)
 
 REM --- Locate binary ---
 
 set "SCRIPT_DIR=%~dp0"
 set "INSTALL_DIR=%LOCALAPPDATA%\evershell"
-set "SERVICE_NAME=Evershell Agent"
+set "REG_KEY=HKCU\Software\Microsoft\Windows\CurrentVersion\Run"
+set "REG_VALUE=Evershell Agent"
 
 if "%~1" neq "" (
     set "BINARY=%~1"
@@ -46,17 +37,13 @@ if not exist "%DEFAULT_SETTINGS%" (
     exit /b 1
 )
 
-REM --- Stop existing service if running ---
+REM --- Stop existing process if running ---
 
-sc query "%SERVICE_NAME%" >nul 2>&1
-if %ERRORLEVEL% equ 0 (
-    echo Stopping existing service...
-    "%INSTALL_DIR%\evershell-agent.exe" stop 2>nul
+tasklist /fi "imagename eq evershell-agent.exe" 2>nul | findstr /i "evershell-agent.exe" >nul
+if !ERRORLEVEL! equ 0 (
+    echo Stopping existing process...
+    taskkill /f /im evershell-agent.exe >nul 2>&1
     timeout /t 2 /nobreak >nul
-
-    echo Removing existing service registration...
-    "%INSTALL_DIR%\evershell-agent.exe" uninstall 2>nul
-    timeout /t 1 /nobreak >nul
 )
 
 REM --- Install binary and default settings ---
@@ -66,21 +53,15 @@ if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 copy /y "%BINARY%" "%INSTALL_DIR%\evershell-agent.exe" >nul
 xcopy /y /e /i "%DEFAULT_SETTINGS%" "%INSTALL_DIR%\default_settings" >nul
 
-REM --- Register and start service ---
+REM --- Register auto-start at logon ---
 
-echo Registering service...
-"%INSTALL_DIR%\evershell-agent.exe" install
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: Service registration failed.
-    exit /b 1
-)
+echo Registering auto-start...
+reg add "!REG_KEY!" /v "!REG_VALUE!" /d "conhost.exe --headless \"!INSTALL_DIR!\evershell-agent.exe\"" /f >nul
 
-echo Starting service...
-"%INSTALL_DIR%\evershell-agent.exe" start
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: Service failed to start.
-    exit /b 1
-)
+REM --- Start process ---
+
+echo Starting...
+start "" conhost.exe --headless "!INSTALL_DIR!\evershell-agent.exe"
 
 REM --- Wait for startup ---
 
@@ -95,10 +76,18 @@ echo.
 echo Service running.
 echo Settings: %SETTINGS_DIR%\settings.json
 if exist "%TOKENS_FILE%" (
-    echo Token: see %TOKENS_FILE%
+    for /f "tokens=2 delims=:" %%a in ('findstr /c:"\"token\"" "%TOKENS_FILE%"') do (
+        set "TOKEN=%%~a"
+        set "TOKEN=!TOKEN: =!"
+        set "TOKEN=!TOKEN:"=!"
+        set "TOKEN=!TOKEN:,=!"
+        if not "!TOKEN!"=="" echo Token: !TOKEN!
+    )
 )
 echo.
 echo Service management:
-echo   sc query "%SERVICE_NAME%"
-echo   %INSTALL_DIR%\evershell-agent.exe stop
-echo   %INSTALL_DIR%\evershell-agent.exe start
+echo   tasklist /fi "imagename eq evershell-agent.exe"
+echo   taskkill /f /im evershell-agent.exe
+echo   start "" "%INSTALL_DIR%\evershell-agent.exe"
+
+exit /b 0 

@@ -18,16 +18,6 @@ $ProgressPreference = 'SilentlyContinue'
 function Invoke-EvershellInstall {
     param([string]$Version)
 
-    # --- Check Administrator ---
-
-    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-        [Security.Principal.WindowsBuiltInRole]::Administrator)
-    if (-not $isAdmin) {
-        Write-Host "ERROR: This script must be run as Administrator."
-        Write-Host "Right-click PowerShell and select 'Run as administrator', then re-run this script."
-        return 1
-    }
-
     # --- Detect architecture ---
 
     $Repo = "oviano/evershell"
