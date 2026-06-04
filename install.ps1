@@ -15,77 +15,92 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $ProgressPreference = 'SilentlyContinue'
 
-# --- Check Administrator ---
+function Invoke-EvershellInstall {
+    param([string]$Version)
 
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-    [Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $isAdmin) {
-    Write-Host "ERROR: This script must be run as Administrator."
-    Write-Host "Right-click PowerShell and select 'Run as administrator', then re-run this script."
-    exit 1
-}
+    # --- Check Administrator ---
 
-# --- Detect architecture ---
-
-$Repo = "oviano/evershell"
-$Arch = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm_64" } else { "x86_64" }
-
-# --- Get latest version if not specified ---
-
-if (-not $Version) {
-    Write-Host "Fetching latest release..."
-    try {
-        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest"
-        $Version = $release.tag_name -replace '^v', ''
-    } catch {
-        Write-Host "ERROR: Could not fetch latest release"
-        exit 1
+    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+        [Security.Principal.WindowsBuiltInRole]::Administrator)
+    if (-not $isAdmin) {
+        Write-Host "ERROR: This script must be run as Administrator."
+        Write-Host "Right-click PowerShell and select 'Run as administrator', then re-run this script."
+        return 1
     }
-}
 
-Write-Host "Installing evershell-agent v$Version..."
+    # --- Detect architecture ---
 
-# --- Download tarball ---
+    $Repo = "oviano/evershell"
+    $Arch = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm_64" } else { "x86_64" }
 
-$Archive = "evershell-agent-$Version-windows-$Arch.tar.gz"
-$Url = "https://github.com/$Repo/releases/download/v$Version/$Archive"
-$TmpDir = Join-Path $env:TEMP "evershell-install"
+    # --- Get latest version if not specified ---
 
-if (Test-Path $TmpDir) { Remove-Item $TmpDir -Recurse -Force }
-New-Item -ItemType Directory -Force -Path $TmpDir | Out-Null
+    if (-not $Version) {
+        Write-Host "Fetching latest release..."
+        try {
+            $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest"
+            $Version = $release.tag_name -replace '^v', ''
+        } catch {
+            Write-Host "ERROR: Could not fetch latest release"
+            return 1
+        }
+    }
 
-Write-Host "Downloading $Url..."
-try {
-    Invoke-WebRequest -Uri $Url -OutFile (Join-Path $TmpDir $Archive)
-} catch {
-    Write-Host "ERROR: Download failed. Check the version and platform."
-    Write-Host "Available releases: https://github.com/$Repo/releases"
+    Write-Host "Installing evershell-agent v$Version..."
+
+    # --- Download tarball ---
+
+    $Archive = "evershell-agent-$Version-windows-$Arch.tar.gz"
+    $Url = "https://github.com/$Repo/releases/download/v$Version/$Archive"
+    $TmpDir = Join-Path $env:TEMP "evershell-install"
+
+    if (Test-Path $TmpDir) { Remove-Item $TmpDir -Recurse -Force }
+    New-Item -ItemType Directory -Force -Path $TmpDir | Out-Null
+
+    Write-Host "Downloading $Url..."
+    try {
+        Invoke-WebRequest -Uri $Url -OutFile (Join-Path $TmpDir $Archive)
+    } catch {
+        Write-Host "ERROR: Download failed. Check the version and platform."
+        Write-Host "Available releases: https://github.com/$Repo/releases"
+        Remove-Item $TmpDir -Recurse -Force
+        return 1
+    }
+
+    # --- Extract ---
+
+    tar xzf (Join-Path $TmpDir $Archive) -C $TmpDir
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: Extraction failed"
+        Remove-Item $TmpDir -Recurse -Force
+        return 1
+    }
+
+    # --- Run local installer ---
+
+    $LocalInstaller = Join-Path $TmpDir "install-windows.ps1"
+    if (-not (Test-Path $LocalInstaller)) {
+        Write-Host "ERROR: install-windows.ps1 not found in tarball"
+        Remove-Item $TmpDir -Recurse -Force
+        return 1
+    }
+
+    & $LocalInstaller
+    $InstallResult = $LASTEXITCODE
+
+    # --- Clean up ---
+
     Remove-Item $TmpDir -Recurse -Force
-    exit 1
+
+    return $InstallResult
 }
 
-# --- Extract ---
+$code = Invoke-EvershellInstall -Version $Version
 
-tar xzf (Join-Path $TmpDir $Archive) -C $TmpDir
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "ERROR: Extraction failed"
-    Remove-Item $TmpDir -Recurse -Force
-    exit 1
+# Only `exit` when run as a script file (.\install.ps1 / -File), where it merely
+# ends the script. Under `irm ... | iex` the body runs in the caller's own
+# interactive session, so a top-level `exit` would close their PowerShell window
+# before they can read the token/output. $PSCommandPath is empty in that case.
+if ($PSCommandPath) {
+    exit $code
 }
-
-# --- Run local installer ---
-
-$LocalInstaller = Join-Path $TmpDir "install-windows.ps1"
-if (-not (Test-Path $LocalInstaller)) {
-    Write-Host "ERROR: install-windows.ps1 not found in tarball"
-    Remove-Item $TmpDir -Recurse -Force
-    exit 1
-}
-
-& $LocalInstaller
-$InstallResult = $LASTEXITCODE
-
-# --- Clean up ---
-
-Remove-Item $TmpDir -Recurse -Force
-exit $InstallResult
